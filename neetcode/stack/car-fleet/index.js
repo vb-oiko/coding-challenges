@@ -16,7 +16,6 @@ var carFleet = function (target, position, speed) {
 
   const cars = unsortedData.sort((a, b) => b.position - a.position);
 
-  const result = [];
   let fleets = 1;
   let currentArrival = cars[0].arrival;
 
