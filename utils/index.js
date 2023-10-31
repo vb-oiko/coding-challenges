@@ -67,6 +67,10 @@ class ListNode {
 
     return result;
   }
+
+  static toString(node) {
+    return ListNode.toArray(node).join(" -> ");
+  }
 }
 
 module.exports = { expect, ListNode };
