@@ -13,53 +13,30 @@
 var maxPathSum = function (root) {
   let max = root.val;
 
-  function maxNonSplittedPath(node) {
+  function traverse(node) {
     if (!node) {
       return 0;
     }
 
-    if (!node.left && !node.right) {
-      return node.val;
-    }
+    const leftNonSplittedPath = traverse(node.left);
+    const rightNonSplittedPath = traverse(node.right);
 
-    if (!node.left) {
-      return Math.max(node.val, node.val + maxNonSplittedPath(node.right));
-    }
-
-    if (!node.right) {
-      return Math.max(node.val, node.val + maxNonSplittedPath(node.left));
-    }
-
-    return Math.max(
+    const currentNonSplittedPath = Math.max(
       node.val,
-      node.val +
-        Math.max(maxNonSplittedPath(node.left), maxNonSplittedPath(node.right))
-    );
-  }
-
-  function traverse(node) {
-    if (!node) {
-      return;
-    }
-
-    const leftNonSplittedPath = maxNonSplittedPath(node.left);
-    const rightNonSplittedPath = maxNonSplittedPath(node.right);
-
-    max = Math.max(
-      max,
-      node.val,
-      node.val + leftNonSplittedPath,
-      node.val + rightNonSplittedPath,
-      node.val + leftNonSplittedPath + rightNonSplittedPath
+      node.val + Math.max(leftNonSplittedPath, rightNonSplittedPath)
     );
 
-    traverse(node.left);
-    traverse(node.right);
+    const currentSplittedPath =
+      node.val + leftNonSplittedPath + rightNonSplittedPath;
+
+    max = Math.max(max, currentNonSplittedPath, currentSplittedPath);
+
+    return currentNonSplittedPath;
   }
 
-  traverse(root);
+  const maxNonSplittedPath = traverse(root);
 
-  return max;
+  return Math.max(max, maxNonSplittedPath);
 };
 
 const { TreeNode } = require("../../../utils");
@@ -70,6 +47,7 @@ const tests = [
   { input: [-1, -2, 10, -6, null, -3, -6], output: 10 },
   { input: [-10, 9, 20, null, null, 15, 7], output: 42 },
   { input: [-1, 5, null, 4, null, null, 2, -4], output: 11 },
+  { input: [-1, -2, 10, -6, null, -3, -6], output: 10 },
 ];
 
 for (const { input, output } of tests) {
