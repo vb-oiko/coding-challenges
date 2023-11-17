@@ -44,10 +44,8 @@ class TreeNode {
 
     while (i < arr.length) {
       const nextLevel = traverse(level);
-      console.warn(level);
       level = nextLevel;
     }
-    console.warn(level);
 
     return head;
   }
