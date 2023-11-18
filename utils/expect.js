@@ -23,6 +23,14 @@ const expect = {
 };
 
 function isArrayEqual(source, target) {
+  if (!Array.isArray(source) || !Array.isArray(target)) {
+    throw new Error(
+      `Either or both of the arguments is not an array (source: ${JSON.stringify(
+        source
+      )}, target: ${JSON.stringify(target)})`
+    );
+  }
+
   if (source.length !== target.length) {
     return false;
   }
