@@ -24,50 +24,43 @@ var findWords = function (board, words) {
   const n = board[0].length;
   const trie = buildTrie(words);
 
-  function backTrack(i, j, trieNode) {
-    const char = board[i][j];
-    if (!trieNode.map.has(char)) {
+  function backTrack(i, j, str) {
+    const { prefix, word } = trie.search(str);
+    if (!prefix) {
       return;
     }
 
-    const nextTrieNode = trieNode.map.get(char);
-
-    if (nextTrieNode.word) {
-      result.add(nextTrieNode.word);
-      nextTrieNode.word = null;
+    if (word) {
+      result.add(str);
     }
 
     visited[i][j] = true;
 
     if (i - 1 >= 0 && !visited[i - 1][j]) {
-      backTrack(i - 1, j, nextTrieNode);
+      backTrack(i - 1, j, `${str}${board[i - 1][j]}`);
       visited[i - 1][j] = false;
     }
 
     if (i + 1 < m && !visited[i + 1][j]) {
-      backTrack(i + 1, j, nextTrieNode);
+      backTrack(i + 1, j, `${str}${board[i + 1][j]}`);
       visited[i + 1][j] = false;
     }
 
     if (j - 1 >= 0 && !visited[i][j - 1]) {
-      backTrack(i, j - 1, nextTrieNode);
+      backTrack(i, j - 1, `${str}${board[i][j - 1]}`);
       visited[i][j - 1] = false;
     }
 
     if (j + 1 < n && !visited[i][j + 1]) {
-      backTrack(i, j + 1, nextTrieNode);
+      backTrack(i, j + 1, `${str}${board[i][j + 1]}`);
       visited[i][j + 1] = false;
-    }
-
-    if (nextTrieNode.map.size === 0) {
-      trieNode.map.delete(char);
     }
   }
 
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
       visited = buildFreshVisited();
-      backTrack(i, j, trie.root);
+      backTrack(i, j, board[i][j]);
     }
   }
 
@@ -77,7 +70,7 @@ var findWords = function (board, words) {
 class TrieNode {
   constructor() {
     this.map = new Map();
-    this.word = null;
+    this.word = false;
   }
 }
 
@@ -97,7 +90,7 @@ class Trie {
       node = node.map.get(key);
     }
 
-    node.word = word;
+    node.word = true;
   }
 
   search(word) {
