@@ -43,31 +43,65 @@ Twitter.prototype.getOrCreateUser = function (userId) {
  * @return {number[]}
  */
 Twitter.prototype.getNewsFeed = function (userId) {
-  const mpq = new MaxPriorityQueue();
-
   const user = this.getOrCreateUser(userId);
-
-  user.followees.forEach((id) => {
+  let tweets = [...user.followees.values()].map((id) => {
     const followee = this.getOrCreateUser(id);
-    const recentTweets = followee.tweets.slice(
+    return followee.tweets.slice(
       Math.max(0, followee.tweets.length - 10),
       followee.tweets.length
     );
-
-    recentTweets.forEach((tweet) => mpq.enqueue(tweet.id, tweet.time));
   });
 
-  const result = [];
+  while (tweets.length > 1) {
+    const merged = [];
+    for (let k = 0; k < tweets.length; k += 2) {
+      let a = tweets[k];
+      let b = k + 1 < tweets.length ? tweets[k + 1] : null;
 
-  for (let i = 0; i < 10; i++) {
-    if (mpq.size() === 0) {
-      break;
+      if (!b) {
+        merged.push(a);
+        break;
+      }
+
+      const arr = [];
+      let i = 0;
+      let j = 0;
+
+      while (i < a.length || j < b.length) {
+        if (i >= a.length) {
+          arr.push(b[j]);
+          j++;
+          continue;
+        }
+
+        if (j >= b.length) {
+          arr.push(a[i]);
+          i++;
+          continue;
+        }
+
+        if (a[i].time < b[j].time) {
+          arr.push(a[i]);
+          i++;
+          continue;
+        }
+
+        arr.push(b[j]);
+        j++;
+      }
+
+      merged.push(arr);
     }
 
-    result.push(mpq.dequeue().element);
+    tweets = merged;
   }
 
-  return result;
+  const feed = tweets[0];
+  const res = feed
+    .slice(Math.max(0, feed.length - 10), feed.length)
+    .map(({ id }) => id)
+    .reverse();
+  return res;
 };
 
 /**
@@ -101,24 +135,22 @@ Twitter.prototype.unfollow = function (followerId, followeeId) {
  * obj.unfollow(followerId,followeeId)
  */
 
-var { MaxPriorityQueue } = require("@datastructures-js/priority-queue");
-
 const tests = [
-  //   {
-  //     commands: [
-  //       "Twitter",
-  //       "postTweet",
-  //       "getNewsFeed",
-  //       "follow",
-  //       "postTweet",
-  //       "getNewsFeed",
-  //       "unfollow",
-  //       "getNewsFeed",
-  //     ],
+  {
+    commands: [
+      "Twitter",
+      "postTweet",
+      "getNewsFeed",
+      "follow",
+      "postTweet",
+      "getNewsFeed",
+      "unfollow",
+      "getNewsFeed",
+    ],
 
-  //     params: [[], [1, 5], [1], [1, 2], [2, 6], [1], [1, 2], [1]],
-  //     output: [null, null, [5], null, null, [6, 5], null, [5]],
-  //   },
+    params: [[], [1, 5], [1], [1, 2], [2, 6], [1], [1, 2], [1]],
+    output: [null, null, [5], null, null, [6, 5], null, [5]],
+  },
   {
     commands: [
       "Twitter",
@@ -208,7 +240,6 @@ for (const { commands, params, output } of tests) {
     results.push(result);
   }
 
-  console.warn(twitter);
   const isValid = expect.array(results).toEqual(output);
 
   console.warn({ commands, params, results, output, isValid });
