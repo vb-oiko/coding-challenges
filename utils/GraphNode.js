@@ -45,7 +45,6 @@ class Node {
       }
 
       visited.add(node);
-      console.warn({ node });
 
       result[node.val - 1] = node.neighbors.map(({ val }) => val);
       node.neighbors.forEach((neighbor) => dfs(neighbor));
