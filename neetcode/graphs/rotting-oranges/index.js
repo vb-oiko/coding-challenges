@@ -6,42 +6,70 @@ var orangesRotting = function (grid) {
   const EMPTY = 0;
   const FRESH = 1;
   const ROTTEN = 2;
+  const NEIGHBORS = [
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0],
+  ];
 
   const m = grid.length;
   const n = grid[0].length;
 
   const time = new Array(m).fill().map(() => new Array(n).fill(null));
 
-  function dfs(i, j, moment) {
-    if (i < 0 || j < 0 || i >= m || j >= n || grid[i][j] === EMPTY) {
-      return 0;
-    }
-
-    if (grid[i][j] === ROTTEN) {
-      time[i][j] = 0;
-    }
-
-    if (time[i][j] !== null && time[i][j] < moment) {
+  function bfs(level, moment) {
+    if (!level.length) {
       return;
     }
 
-    if (grid[i][j] === FRESH) {
+    const nextLevel = [];
+    const nextLevelSet = new Set();
+
+    for (const { i, j } of level) {
       time[i][j] = moment;
+
+      for (const [di, dj] of NEIGHBORS) {
+        const i1 = i + di;
+        const j1 = j + dj;
+
+        if (
+          i1 < 0 ||
+          j1 < 0 ||
+          i1 >= m ||
+          j1 >= n ||
+          grid[i1][j1] !== FRESH ||
+          time[i1][j1] !== null
+        ) {
+          continue;
+        }
+
+        const key = `${i1}-${j1}`;
+
+        if (nextLevelSet.has(key)) {
+          continue;
+        }
+
+        nextLevelSet.add(key);
+        nextLevel.push({ i: i1, j: j1 });
+        time[i1][j1] = moment;
+      }
     }
 
-    dfs(i + 1, j, moment + 1);
-    dfs(i - 1, j, moment + 1);
-    dfs(i, j + 1, moment + 1);
-    dfs(i, j - 1, moment + 1);
+    bfs(nextLevel, moment + 1);
   }
+
+  const level = [];
 
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
       if (grid[i][j] === ROTTEN) {
-        dfs(i, j, 0);
+        level.push({ i, j });
       }
     }
   }
+
+  bfs(level, 0);
 
   let max = 0;
 
@@ -61,29 +89,38 @@ var orangesRotting = function (grid) {
 };
 
 const tests = [
+  //   {
+  //     grid: [
+  //       [2, 1, 1],
+  //       [1, 1, 0],
+  //       [0, 1, 1],
+  //     ],
+  //     output: 4,
+  //   },
+  //   {
+  //     grid: [
+  //       [2, 1, 1],
+  //       [0, 1, 1],
+  //       [1, 0, 1],
+  //     ],
+  //     output: -1,
+  //   },
+  //   {
+  //     grid: [[0, 2]],
+  //     output: 0,
+  //   },
+  //   {
+  //     grid: [[0, 1]],
+  //     output: -1,
+  //   },
   {
     grid: [
-      [2, 1, 1],
-      [1, 1, 0],
-      [0, 1, 1],
+      [2, 2],
+      [1, 1],
+      [0, 0],
+      [2, 0],
     ],
-    output: 4,
-  },
-  {
-    grid: [
-      [2, 1, 1],
-      [0, 1, 1],
-      [1, 0, 1],
-    ],
-    output: -1,
-  },
-  {
-    grid: [[0, 2]],
-    output: 0,
-  },
-  {
-    grid: [[0, 1]],
-    output: -1,
+    output: 1,
   },
 ];
 
