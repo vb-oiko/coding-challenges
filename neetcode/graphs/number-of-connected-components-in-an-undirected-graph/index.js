@@ -12,7 +12,7 @@ var countComponents = function (n, edges) {
       return node;
     }
 
-    return find(representative[node]);
+    return (representative[node] = find(representative[node]));
   }
 
   function combine(a, b) {
