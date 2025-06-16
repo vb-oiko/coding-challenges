@@ -136,15 +136,15 @@ function extractTestCasesFromHTML(html) {
     return testCases;
 }
 
-function generateTestBoilerplate(testCases) {
+function generateTestBoilerplate(testCases, functionName) {
     return `
 
-const tests = ${JSON.stringify(testCases, null, 2)};
+const tests = ${JSON.stringify(testCases)};
 
 import deepEqual from 'deep-eql';
 
 for (const test of tests) {
-    const result = merge(...Object.values(test.input));
+    const result = ${functionName}(...Object.values(test.input));
     if (!deepEqual(result, test.output)) {
         console.log('❌ fail:');
         console.dir(
@@ -159,13 +159,23 @@ for (const test of tests) {
     `;
 }
 
+function parseFunctionName(functionCode) {
+    // Matches: var functionName = function(
+    const match = functionCode.match(
+        /var\s+([a-zA-Z0-9_]+)\s*=\s*function\s*\(/
+    );
+    return match ? match[1] : null;
+}
+
 async function main() {
     const url = await prompt('Enter LeetCode problem URL: ');
     const metadata = await fetchProblemMetadata(url);
     const kebabName = toKebabCase(metadata.title);
     const testCases = extractTestCasesFromHTML(metadata.descriptionHtml);
-
-    console.dir(testCases, { depth: null });
+    const functionName = parseFunctionName(metadata.functionCode);
+    if (!functionName) {
+        console.error('❌ Could not parse function name from code snippet.');
+    }
 
     const categories = fs
         .readdirSync(BASE_PATH, { withFileTypes: true })
@@ -189,9 +199,13 @@ async function main() {
     fs.mkdirSync(targetDir, { recursive: true });
 
     fs.writeFileSync(indexFile, metadata.functionCode);
-    fs.writeFileSync(indexFile, generateTestBoilerplate(testCases), {
-        flag: 'a',
-    });
+    fs.writeFileSync(
+        indexFile,
+        generateTestBoilerplate(testCases, functionName),
+        {
+            flag: 'a',
+        }
+    );
 
     fs.writeFileSync(
         path.join(targetDir, 'README.md'),
