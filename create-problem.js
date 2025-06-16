@@ -85,24 +85,51 @@ function extractTestCasesFromHTML(html) {
     const $ = load(html);
     const testCases = [];
 
-    $('strong').each((_, el) => {
-        const text = $(el).text();
-        if (/example/i.test(text)) {
-            const block = $(el).parent().text();
-            const inputs = [];
-            const outputs = [];
+    $('strong.example').each((_, el) => {
+        const pre = $(el).parent().next('pre');
+        if (pre.length === 0) return;
 
-            const matches = block.match(
-                /Input:\s*([^\n]+)\n?.*?Output:\s*([^\n]+)/i
-            );
-            if (matches) {
-                inputs.push(matches[1].trim());
-                outputs.push(matches[2].trim());
-                testCases.push({
-                    input: inputs.join(','),
-                    expected: outputs.join(','),
-                });
+        const lines = pre
+            .text()
+            .split('\n')
+            .map((l) => l.trim())
+            .filter(Boolean);
+        let inputObj = {};
+        let outputVal = undefined;
+
+        for (const line of lines) {
+            // Match Input: pairs = [[1,2],[2,3],[3,4]]
+            const inputMatch = line.match(/^Input:\s*(.+)$/i);
+            if (inputMatch) {
+                let inputStr = inputMatch[1]
+                    .replace(/=/g, ':')
+                    .replace(/'/g, '"'); // handle single quotes if any
+                // Wrap in curly braces
+                inputStr = `{${inputStr}}`;
+                try {
+                    // Use Function to parse JS-like arrays (since JSON.parse doesn't allow unquoted keys or single quotes)
+                    inputObj = new Function('return ' + inputStr)();
+                } catch {
+                    inputObj = {};
+                }
             }
+            // Match Output: 2
+            const outputMatch = line.match(/^Output:\s*(.+)$/i);
+            if (outputMatch) {
+                let val = outputMatch[1].trim();
+                try {
+                    outputVal = new Function('return ' + val)();
+                } catch {
+                    outputVal = val;
+                }
+            }
+        }
+
+        if (Object.keys(inputObj).length && outputVal !== undefined) {
+            testCases.push({
+                input: inputObj,
+                output: outputVal,
+            });
         }
     });
 
