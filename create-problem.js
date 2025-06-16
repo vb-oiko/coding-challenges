@@ -136,27 +136,36 @@ function extractTestCasesFromHTML(html) {
     return testCases;
 }
 
-function formatTestFile(functionName, cases) {
-    return `const { ${functionName} } = require('./index');
+function generateTestBoilerplate(testCases) {
+    return `
 
-describe('${functionName}', () => {
-${cases
-    .map(
-        (c, i) => `  it('Example ${i + 1}', () => {
-    expect(${functionName}(${c.input})).toEqual(${c.expected});
-  });`
-    )
-    .join('\n')}
-});
-`;
+const tests = ${JSON.stringify(testCases, null, 2)};
+
+import deepEqual from 'deep-eql';
+
+for (const test of tests) {
+    const result = merge(...Object.values(test.input));
+    if (!deepEqual(result, test.output)) {
+        console.log('❌ fail:');
+        console.dir(
+            { ...test.input, result, expected: test.output },
+            { depth: null }
+        );
+    } else {
+        console.log('✅ pass');
+    }
+}
+
+    `;
 }
 
 async function main() {
     const url = await prompt('Enter LeetCode problem URL: ');
     const metadata = await fetchProblemMetadata(url);
     const kebabName = toKebabCase(metadata.title);
-    const camelName = toCamelCase(metadata.title);
     const testCases = extractTestCasesFromHTML(metadata.descriptionHtml);
+
+    console.dir(testCases, { depth: null });
 
     const categories = fs
         .readdirSync(BASE_PATH, { withFileTypes: true })
@@ -171,7 +180,6 @@ async function main() {
 
     const targetDir = path.join(BASE_PATH, category, kebabName);
     const indexFile = path.join(targetDir, 'index.js');
-    const testFile = path.join(targetDir, 'test.js');
 
     if (fs.existsSync(indexFile)) {
         console.error('❌ Problem already exists.');
@@ -181,11 +189,17 @@ async function main() {
     fs.mkdirSync(targetDir, { recursive: true });
 
     fs.writeFileSync(indexFile, metadata.functionCode);
-    fs.writeFileSync(testFile, formatTestFile(camelName, testCases));
+    fs.writeFileSync(indexFile, generateTestBoilerplate(testCases), {
+        flag: 'a',
+    });
+
+    fs.writeFileSync(
+        path.join(targetDir, 'README.md'),
+        `# ${metadata.title}\n\nDifficulty: ${metadata.difficulty}\n\n## Description\n${metadata.descriptionHtml}`
+    );
 
     console.log(`\n✅ Created:`);
     console.log(`- ${indexFile}`);
-    console.log(`- ${testFile}`);
 }
 
 main();
