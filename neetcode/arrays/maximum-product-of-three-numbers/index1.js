@@ -3,46 +3,13 @@
  * @return {number}
  */
 var maximumProduct = function (nums) {
-    var l1 = 0;
-    var l2 = null;
-    var l3 = null;
-    var s1 = 0;
-    var s2 = null;
-    var i;
+    nums = nums.sort((a, b) => b - a);
     var n = nums.length;
 
-    for (i = 0; i < n; i++) {
-        if (nums[i] > nums[l1]) {
-            l1 = i;
-        }
-        if (nums[i] < nums[s1]) {
-            s1 = i;
-        }
-    }
+    var prod1 = nums[0] * nums[1] * nums[2];
 
-    for (i = 0; i < n; i++) {
-        if (nums[i] > (l2 !== null ? nums[l2] : -Infinity) && i !== l1) {
-            l2 = i;
-        }
-        if (nums[i] < (s2 !== null ? nums[s2] : Infinity) && i !== s1) {
-            s2 = i;
-        }
-    }
-
-    for (i = 0; i < n; i++) {
-        if (
-            nums[i] > (l3 !== null ? nums[l3] : -Infinity) &&
-            i !== l1 &&
-            i !== l2
-        ) {
-            l3 = i;
-        }
-    }
-
-    var prod1 = nums[l1] * nums[l2] * nums[l3];
-    var prod2 = nums[l1] * nums[s1] * nums[s2];
-
-    if (nums[s1] < 0 && nums[s2] < 0 && nums[l1] > 0) {
+    if (nums[n - 1] < 0 && nums[n - 2] < 0 && nums[0] > 0) {
+        var prod2 = nums[n - 1] * nums[n - 2] * nums[0];
         return Math.max(prod1, prod2);
     }
 
