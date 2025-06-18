@@ -11,7 +11,9 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const BASE_PATH = path.join(__dirname, 'neetcode');
+const BASE_PATH = path.join(__dirname, '../neetcode');
+
+console.dir({ BASE_PATH });
 
 const prompt = (q) =>
     new Promise((resolve) => {
