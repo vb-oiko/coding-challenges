@@ -5,7 +5,8 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "neetcode": "node ./scripts/neetcode.js"
+        "neetcode": "node ./scripts/neetcode.js",
+        "leetcode": "node ./scripts/leetcode.js"
     },
     "repository": {
         "type": "git",
