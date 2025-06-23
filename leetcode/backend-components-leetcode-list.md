@@ -19,14 +19,14 @@ A collection of LeetCode problems that map to common backend infrastructure comp
 
 ## Event Counting & Rate Limiting
 
-- [Design Hit Counter](https://leetcode.com/problems/design-hit-counter/)
-- [Logger Rate Limiter](https://leetcode.com/problems/logger-rate-limiter/)
-- [Design a Rate Limiting System (Chinese)](https://leetcode.cn/problems/design-a-rate-limiting-system/)
+- [🔒Design Hit Counter](https://leetcode.com/problems/design-hit-counter/)
+- [🔒Logger Rate Limiter](https://leetcode.com/problems/logger-rate-limiter/)
+- [🔒Design a Rate Limiting System (Chinese)](https://leetcode.cn/problems/design-a-rate-limiting-system/)
 
 ## Tries & Autocomplete
 
 - [Implement Trie (Prefix Tree)](https://leetcode.com/problems/implement-trie-prefix-tree/)
-- [Design Search Autocomplete System](https://leetcode.com/problems/design-search-autocomplete-system/)
+- [🔒Design Search Autocomplete System](https://leetcode.com/problems/design-search-autocomplete-system/)
 
 ## Task Scheduling
 
